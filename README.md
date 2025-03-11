@@ -1,1 +1,1 @@
-"# RatingSystemSimulation" 
+Симулятор для рейтинговой системы GLICKO

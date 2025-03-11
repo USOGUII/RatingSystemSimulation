@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GameInfoWindow</class>
+ <widget class="QWidget" name="GameInfoWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>640</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>640</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#GameInfoWindow {
+    background-color: #2f2f2f; /* Основной фон окна */
+}
+
+QMenuBar {
+    background-color: #4f4f4f; /* Фон меню-бара */
+    color: #ffffff; /* Цвет текста в меню-баре */
+}
+
+QMenuBar::item {
+    background-color: transparent; /* Фон пунктов меню */
+    color: #ffffff; /* Цвет текста пунктов меню */
+}
+
+QMenuBar::item:selected {
+    background-color: #6f6f6f; /* Фон выбранного пункта меню */
+}
+
+QMenu {
+    background-color: #4f4f4f; /* Фон выпадающих меню */
+    color: #ffffff; /* Цвет текста в выпадающих меню */
+}
+
+QMenu::item {
+    background-color: transparent; /* Фон пунктов выпадающих меню */
+    color: #ffffff; /* Цвет текста пунктов выпадающих меню */
+}
+
+QMenu::item:selected {
+    background-color: #6f6f6f; /* Фон выбранного пункта выпадающего меню */
+}
+
+QPushButton {
+    background-color: #4f4f4f; /* Фон кнопок */
+    color: #ffffff; /* Цвет текста на кнопках */
+    border: 1px solid #6f6f6f; /* Граница кнопок */
+    padding: 5px; /* Отступы текста на кнопках */
+}
+
+QPushButton:hover {
+    background-color: #6f6f6f; /* Фон кнопок при наведении */
+}
+
+QPushButton:pressed {
+    background-color: #3f3f3f; /* Фон кнопок при нажатии */
+}
+
+QLabel {
+    color: #ffffff; /* Цвет текста в метках */
+}
+
+QLineEdit {
+    background-color: #4f4f4f; /* Фон полей ввода */
+    color: #ffffff; /* Цвет текста в полях ввода */
+    border: 1px solid #6f6f6f; /* Граница полей ввода */
+    padding: 5px; /* Отступы текста в полях ввода */
+}
+
+QComboBox {
+    background-color: #4f4f4f; /* Фон комбо-боксов */
+    color: #ffffff; /* Цвет текста в комбо-боксах */
+    border: 1px solid #6f6f6f; /* Граница комбо-боксов */
+    padding: 5px; /* Отступы текста в комбо-боксах */
+}
+
+QComboBox QAbstractItemView {
+    background-color: #4f4f4f; /* Фон выпадающего списка комбо-бокса */
+    color: #ffffff; /* Цвет текста в выпадающем списке комбо-бокса */
+}
+
+QComboBox QAbstractItemView::item {
+    background-color: transparent; /* Фон пунктов выпадающего списка комбо-бокса */
+    color: #ffffff; /* Цвет текста пунктов выпадающего списка комбо-бокса */
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #6f6f6f; /* Фон выбранного пункта выпадающего списка комбо-бокса */
+}
+
+QGroupBox::title {
+    color: white;
+}
+
+QMessageBox{
+	background-color: #2f2f2f;
+}</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="0">
+    <widget class="QLabel" name="team1SquadLabel">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="team2SquadLabel">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="4" column="0" colspan="2">
+      <widget class="QLabel" name="team1ScoreLabel">
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Team1 score: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="2">
+      <widget class="QLabel" name="winnerLabel">
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Победа team №</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="gameIDLabel">
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>ID ИГРЫ</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

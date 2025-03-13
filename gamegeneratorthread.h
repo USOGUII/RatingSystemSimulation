@@ -1,27 +1,26 @@
-// gamegeneratorthread.h
-#ifndef GAMEGENERATOR_THREAD_H
-#define GAMEGENERATOR_THREAD_H
+#ifndef GAMEGENERATORTHREAD_H
+#define GAMEGENERATORTHREAD_H
 
 #include <QThread>
+#include <QDateTime>
 #include "databasemanager.h"
 #include "gamegenerator.h"
-#include <QDateTime>
 
 class GameGeneratorThread : public QThread {
     Q_OBJECT
-
 public:
-    GameGeneratorThread(DatabaseManager* dbManager, int gameCount, const QDateTime &startDate,
-                        const QDateTime &endDate, int playersPerTeam, QObject *parent = nullptr);
+    GameGeneratorThread(DatabaseManager* dbManager, int gameCount,
+                        const QDateTime &startDate, const QDateTime &endDate,
+                        int playersPerTeam, QObject *parent = nullptr);
     ~GameGeneratorThread() override;
-
-signals:
-    void progressUpdate(int value);
-    void finished();
-    void timeElapsed(int msec);
 
 protected:
     void run() override;
+
+signals:
+    void progressUpdate(int value);
+    void timeElapsed(int msec);
+    void finished();
 
 private:
     DatabaseManager* m_dbManager;
@@ -31,4 +30,4 @@ private:
     int m_playersPerTeam;
 };
 
-#endif // GAMEGENERATOR_THREAD_H
+#endif // GAMEGENERATORTHREAD_H

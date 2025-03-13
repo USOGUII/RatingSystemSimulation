@@ -6,6 +6,7 @@
 #include "gameinfowindow.h"
 #include "importdatabasethread.h"
 #include "playerinfowindow.h"
+#include "ratingdistributionanalyzer.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     QStringList options = QStringList() << "Список игр" << "Игроки";
     ui->comboBox->addItems(options);
     connect(ui->tableView, &QTableView::doubleClicked, this, &MainWindow::onRowDoubleClicked);
-   /*
+    connect(ui->analyzeButton, &QPushButton::clicked, this, &MainWindow::onAnalyzeRatingDistributionClicked);
+    /*
     // Print top 5 players by rating
     QSqlQuery topPlayersQuery(dbManager.database());
     if (topPlayersQuery.exec("SELECT p.nickname, r.glicko_rating, r.total_matches "
@@ -60,55 +62,73 @@ void MainWindow::on_pushButton_2_clicked()
         return;
     }
 
+    ui->analysisTextEdit->clear();
+    ui->meanRatingLabel->setText("Средний рейтинг: ");
+    ui->medianRatingLabel->setText("Медиана: ");
+    ui->stdDevLabel->setText("Стандартное отклонение: ");
+
     if (!gameGen.clearDatabase()) {
         QMessageBox::critical(this, "Ошибка", "Не удалось очистить базу данных!");
         return;
     }
 
-    if (!gameGen.generatePlayers(ui->playerCountBox->value())) {
+    // Генерация игроков разных уровней навыка
+    if (!gameGen.generatePlayersBySkill(
+            ui->playerCountBox->value() / 4,  // низкий уровень
+            ui->playerCountBox->value() / 4,  // средний уровень
+            ui->playerCountBox->value() / 4,  // выше среднего
+            ui->playerCountBox->value() / 4)) // высокий уровень
+    {
         QMessageBox::critical(this, "Ошибка", "Не удалось сгенерировать игроков!");
         return;
     }
-    /*
-    if (!gameGen.generateGames(ui->gameCountBox->value(), ui->startDateBox->dateTime(), ui->endDateBox->dateTime(), ui->playersInTeamBox->value())) {
-        QMessageBox::critical(this, "Ошибка", "Ошибка в генерации игр");
-        return;
-    }*/
-        int gameCount = ui->gameCountBox->value();
 
-        // Disable button while generating to prevent multiple clicks
-        ui->pushButton_2->setEnabled(false);
+    int gameCount = ui->gameCountBox->value();
 
-        //Create a progress dialog
-        QProgressDialog* progressDialog = new QProgressDialog("Идет генерация игр...", "Отмена", 0, gameCount, this);
-        progressDialog->setStyleSheet("background-color: #2f2f2f; color: white;");
-        progressDialog->setWindowModality(Qt::WindowModal);
-        progressDialog->setAutoClose(true);
-        progressDialog->setAutoReset(true);
-        progressDialog->setValue(0);
-        progressDialog->setFixedSize(progressDialog->size()); // Установить фиксированный размер
-        progressDialog->show();
+    // Отключаем кнопку на время генерации
+    ui->pushButton_2->setEnabled(false);
 
-        // Создаем и запускаем поток
-        GameGeneratorThread* thread = new GameGeneratorThread(&dbManager, gameCount, startDate, endDate, playersInTeam, this);
+    // Создаем прогресс-диалог
+    QProgressDialog* progressDialog = new QProgressDialog("Идет генерация игр...", "Отмена", 0, gameCount, this);
+    progressDialog->setStyleSheet("background-color: #2f2f2f; color: white;");
+    progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog->setAutoClose(true);
+    progressDialog->setAutoReset(true);
+    progressDialog->setValue(0);
+    progressDialog->setFixedSize(progressDialog->size());
+    progressDialog->show();
 
-        // Connect the signals:
-        connect(thread, &GameGeneratorThread::timeElapsed, this, &MainWindow::showTimeElapsed);
+    // Создаем и запускаем поток
+    GameGeneratorThread* thread = new GameGeneratorThread(&dbManager, gameCount, startDate, endDate, playersInTeam, this);
 
-        // When thread updates progress, update the progress dialog.
-        connect(thread, &GameGeneratorThread::progressUpdate, progressDialog, &QProgressDialog::setValue);
+    // Подключаем сигналы
+    connect(thread, &GameGeneratorThread::timeElapsed, this, &MainWindow::showTimeElapsed);
 
-        //When the job is done in gameGeneratorThread, clean up
-        connect(thread, &GameGeneratorThread::finished, this, [=]() {
-            progressDialog->setValue(gameCount); // Ensure 100% completion is shown.
-            progressDialog->close();
-            delete progressDialog;  // Important:  Clean up dialog.
-            thread->deleteLater();    //Important: Delete thread *after* it's finished.
-            ui->pushButton_2->setEnabled(true); // Re-enable the button.
-        });
+    // При обновлении прогресса обновляем прогресс-диалог
+    connect(thread, &GameGeneratorThread::progressUpdate, progressDialog, &QProgressDialog::setValue);
 
+    // Когда поток завершится, выполняем очистку
+    connect(thread, &GameGeneratorThread::finished, this, [=]() {
+        progressDialog->setValue(gameCount); // Показываем 100% завершение
+        progressDialog->close();
+        delete progressDialog;  // Важно: освобождаем память диалога
+        thread->deleteLater();  // Важно: удаляем поток после его завершения
+        ui->pushButton_2->setEnabled(true); // Включаем кнопку
 
-        thread->start();  // Start the thread.
+        // Обновляем интерфейс после генерации
+        int currentIndex = ui->comboBox->currentIndex();
+        ui->comboBox->setCurrentIndex(currentIndex == 0 ? 1 : 0);
+        ui->comboBox->setCurrentIndex(currentIndex);
+    });
+
+    // Если пользователь отменяет операцию, останавливаем поток
+    connect(progressDialog, &QProgressDialog::canceled, thread, [=]() {
+        thread->terminate(); // Можно использовать quit() и wait() для более безопасной остановки
+        thread->deleteLater();
+        ui->pushButton_2->setEnabled(true);
+    });
+
+    thread->start();  // Запускаем поток
 }
 
 void MainWindow::showTimeElapsed(int msec) {
@@ -177,6 +197,11 @@ void MainWindow::on_pushButton_clicked() {
             QMessageBox::critical(this, "Ошибка", "Не удалось очистить базу данных!");
             return;
         }
+        ui->analysisTextEdit->clear();
+        ui->meanRatingLabel->setText("Средний рейтинг: ");
+        ui->medianRatingLabel->setText("Медиана: ");
+        ui->stdDevLabel->setText("Стандартное отклонение: ");
+
         QProgressDialog* progressDialog = new QProgressDialog("Импорт базы данных...", "Отмена", 0, 100, this);
         progressDialog->setStyleSheet("background-color: #2f2f2f; color: white;");
         progressDialog->setWindowModality(Qt::WindowModal);
@@ -235,7 +260,7 @@ void MainWindow::on_comboBox_currentIndexChanged(int index) {
     } else if (index == 1) { // Игроки
         QVector<QVector<QString>> playersData = dbManager.getPlayersWithRatings();
 
-        model->setHorizontalHeaderLabels(QStringList() << "Никнейм" << "Рейтинг" << "RD" << "Общее количество игр");
+        model->setHorizontalHeaderLabels(QStringList() << "Никнейм" << "Рейтинг" << "RD" << "Общее количество игр" << "Уровень игры" << "Количество побед" << "Winrate");
 
         for (const auto& row : playersData) {
             QList<QStandardItem*> items;
@@ -264,4 +289,41 @@ void MainWindow::onRowDoubleClicked(const QModelIndex &index) {
         PlayerInfoWindow* playerInfo = new PlayerInfoWindow(playerId, &dbManager, this);
         playerInfo->show();
     }
+}
+
+void MainWindow::onAnalyzeRatingDistributionClicked() {
+    // Получаем данные через метод DatabaseManager
+    QMap<int, int> ratingData = dbManager.getRatingData();
+
+    if (ratingData.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для анализа");
+        return;
+    }
+
+    // Создаем и настраиваем анализатор
+    RatingDistributionAnalyzer analyzer;
+    for (auto it = ratingData.constBegin(); it != ratingData.constEnd(); ++it) {
+        analyzer.addData(it.key(), it.value());
+    }
+
+    // Получаем статистику
+    QMap<QString, double> stats = analyzer.calculateStatistics();
+
+    // Обновляем UI с статистикой
+    ui->meanRatingLabel->setText("Средний рейтинг: " + QString::number(stats["Средний рейтинг"], 'f', 1));
+    ui->medianRatingLabel->setText("Медиана: " + QString::number(stats["Медиана"], 'f', 1));
+    ui->stdDevLabel->setText("Стандартное отклонение: " + QString::number(stats["Стандартное отклонение"], 'f', 1));
+
+    // Создаем и отображаем график
+    QChartView* chartView = analyzer.createDistributionChart();
+    if (chartView) {
+        QMainWindow* chartWindow = new QMainWindow(this);
+        chartWindow->setCentralWidget(chartView);
+        chartWindow->resize(800, 600);
+        chartWindow->show();
+    }
+
+    // Анализ справедливости
+    QString analysis = analyzer.analyzeDistributionFairness();
+    ui->analysisTextEdit->setPlainText(analysis);
 }

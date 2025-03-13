@@ -15,3 +15,5 @@ void ImportDatabaseThread::run() {
     m_success = m_dbManager->importFromJson(m_filePath);
     emit finished();
 }
+
+

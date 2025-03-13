@@ -31,9 +31,12 @@ private slots:
 
     void onRowDoubleClicked(const QModelIndex &index);
 
+    void onAnalyzeRatingDistributionClicked();
+
 private:
     Ui::MainWindow *ui;
     DatabaseManager dbManager;
     GameGenerator gameGen;
+
 };
 #endif // MAINWINDOW_H

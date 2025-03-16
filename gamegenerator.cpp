@@ -92,7 +92,7 @@ bool GameGenerator::generateGames(int gameCount, const QDateTime &startDate,
 
         // Вероятность победы первой команды, сильно зависящая от уровня скилла
         double team1WinProb = team1SkillSum / (team1SkillSum + team2SkillSum);
-        team1WinProb = pow(team1WinProb, 2); // Усиливаем влияние разницы в скилле
+        //team1WinProb = pow(team1WinProb, 2); // Усиливаем влияние разницы в скилле
 
         // Определяем победителя на основе вероятности
         double randomValue = m_random.generateDouble();

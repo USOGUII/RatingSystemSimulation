@@ -10,6 +10,6 @@ int main(int argc, char *argv[])
     a.setOrganizationName("USOGUII");
     a.setOrganizationDomain("STANKIN");
     a.setApplicationName("RatingSystemSimulation");
-    a.setApplicationVersion("0.0.1");
+    a.setApplicationVersion("0.0.3");
     return a.exec();
 }

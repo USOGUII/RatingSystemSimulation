@@ -314,13 +314,36 @@ void MainWindow::onAnalyzeRatingDistributionClicked() {
     ui->medianRatingLabel->setText("Медиана: " + QString::number(stats["Медиана"], 'f', 1));
     ui->stdDevLabel->setText("Стандартное отклонение: " + QString::number(stats["Стандартное отклонение"], 'f', 1));
 
-    // Создаем и отображаем график
-    QChartView* chartView = analyzer.createDistributionChart();
-    if (chartView) {
-        QMainWindow* chartWindow = new QMainWindow(this);
-        chartWindow->setCentralWidget(chartView);
-        chartWindow->resize(800, 600);
-        chartWindow->show();
+    // Создаем и отображаем все три графика
+
+    // 1. График распределения рейтинга по количеству игр
+    QChartView* gamesChartView = analyzer.createDistributionChart();
+    if (gamesChartView) {
+        QMainWindow* gamesChartWindow = new QMainWindow(this);
+        gamesChartWindow->setCentralWidget(gamesChartView);
+        gamesChartWindow->resize(800, 600);
+        gamesChartWindow->setWindowTitle("Распределение рейтинга по количеству игр");
+        gamesChartWindow->show();
+    }
+
+    // 2. График распределения рейтинга по количеству игроков
+    QChartView* playersChartView = analyzer.createPlayerDistributionChart();
+    if (playersChartView) {
+        QMainWindow* playersChartWindow = new QMainWindow(this);
+        playersChartWindow->setCentralWidget(playersChartView);
+        playersChartWindow->resize(800, 600);
+        playersChartWindow->setWindowTitle("Распределение рейтинга по количеству игроков");
+        playersChartWindow->show();
+    }
+
+    // 3. График зависимости рейтинга от уровня скилла
+    QChartView* skillChartView = analyzer.createSkillRatingChart();
+    if (skillChartView) {
+        QMainWindow* skillChartWindow = new QMainWindow(this);
+        skillChartWindow->setCentralWidget(skillChartView);
+        skillChartWindow->resize(800, 600);
+        skillChartWindow->setWindowTitle("Зависимость рейтинга от уровня скилла");
+        skillChartWindow->show();
     }
 
     // Анализ справедливости
